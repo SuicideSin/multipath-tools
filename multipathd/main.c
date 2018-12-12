@@ -1835,6 +1835,18 @@ int update_path_groups(struct multipath *mpp, struct vectors *vecs, int refresh)
 
 static int check_path_reinstate_state(struct path * pp) {
 	struct timespec curr_time;
+
+	/*
+	 * This function is only called when the path state changes
+	 * from "bad" to "good". pp->state reflects the *previous* state.
+	 * If this was "bad", we know that a failure must have occured
+	 * beforehand, and count that.
+	 * It's a bit strange that a failure is counted after the path
+	 * recovered, but it works. But this way we count the state
+	 * *changes* - not sure if this was the original author's intent
+	 * (see https://marc.info/?l=dm-devel&m=148603644723030&w=2)
+	 */
+
 	if (!((pp->mpp->san_path_err_threshold > 0) &&
 				(pp->mpp->san_path_err_forget_rate > 0) &&
 				(pp->mpp->san_path_err_recovery_time >0))) {
